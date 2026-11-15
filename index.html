@@ -42,7 +42,11 @@ h1{font-family:'Special Elite',monospace;font-size:38px;margin:0 0 4px;color:#8b
 .start h2{font-size:30px;margin:0 0 12px;color:#ff6b6b}
 .start button{margin-top:22px;font:700 22px 'Special Elite',monospace;background:#8b1e1e;color:#fff;border:0;border-radius:10px;padding:16px 28px;cursor:pointer}
 .timeout{display:none;margin:22px auto 0;max-width:520px;background:#2a2420;color:#fff;padding:16px;border-radius:10px;text-align:center;font-family:'Special Elite',monospace}
+.go{position:fixed;inset:0;z-index:50;background:#000;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:'Special Elite',monospace}
+.go.show{display:flex}.go h1{color:#e00;font-size:64px;margin:0 0 20px;letter-spacing:4px;animation:fl 1.2s infinite}
+.go p{font-size:24px;max-width:520px;line-height:1.5}@keyframes fl{50%{opacity:.35}}
 </style></head><body><div class="start" id="st"><h2>🔒 MARCOS ESTÁ ENCERRADO</h2><div>Tienes 7 minutos para liberarlo.<br>Sube el volumen 🔊</div><button id="go">EMPEZAR EL RESCATE</button></div>
+<div class="go" id="go"><h1>GAME OVER</h1><p>Tienes que venir a mi casa a salvarme 🏃‍♀️💨</p></div>
 <div class="timer" id="tm">07:00</div><div class="wrap">
 <h1>🔒 MARCOS HA SIDO ENCERRADO</h1>
 <div class="sub">EXPEDIENTE CONFIDENCIAL · TIEMPO LÍMITE: 7 MINUTOS</div>
@@ -88,6 +92,8 @@ const T0=420,ALERTS=[7,5,3,2,1];let left=T0,iv=null,solved=false;const tm=docume
 const aud={};ALERTS.forEach(m=>{const a=new Audio(AUD[m]);a.preload='auto';a.ok=true;a.onerror=()=>a.ok=false;aud[m]=a});
 let ac=null;function beep(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=ac.createOscillator(),gn=ac.createGain();o.frequency.value=880;o.connect(gn);gn.connect(ac.destination);gn.gain.setValueAtTime(.3,ac.currentTime+t);gn.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.25);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.3)})}catch(e){}}
 function alertAt(m){const a=aud[m];if(a&&a.ok){a.currentTime=0;a.play().catch(beep)}else beep()}
+function tick(left){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const v=0.04+0.96*Math.pow((30-left)/29,1.6),t=ac.currentTime,o=ac.createOscillator(),gn=ac.createGain();
+o.type='square';o.frequency.setValueAtTime(left%2?1800:1300,t);o.frequency.exponentialRampToValueAtTime(400,t+.04);gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+.06);o.connect(gn);gn.connect(ac.destination);o.start(t);o.stop(t+.07)}catch(e){}}
 function fmt(t){return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
 document.getElementById('go').onclick=()=>{
   try{ac=new (window.AudioContext||window.webkitAudioContext)();ac.resume()}catch(e){}
@@ -95,7 +101,7 @@ document.getElementById('go').onclick=()=>{
   document.getElementById('st').remove();setTimeout(()=>alertAt(7),300);
   iv=setInterval(()=>{if(solved)return;left--;tm.textContent=fmt(Math.max(left,0));tm.classList.toggle('low',left<=60);
     if(left>0&&left%60==0&&ALERTS.includes(left/60))alertAt(left/60);
-    if(left<=0){clearInterval(iv);tm.textContent='00:00';document.getElementById('to').style.display='block';beep()}},1000)};
+    if(left>0&&left<=30)tick(left);if(left<=0){clearInterval(iv);tm.textContent='00:00';document.getElementById('go').classList.add('show');beep()}},1000)};
 function check(){words.forEach(w=>document.getElementById('c'+w.w).classList.toggle('li-done',w.cs.map(k=>inp[k].value).join('')==w.w));
 const word=mk.map(k=>inp[k].value);[...b.children].forEach((x,i)=>x.querySelector('b').textContent=word[i]);
 const full=word.every(x=>x),ok=word.join('')==SECRET;
